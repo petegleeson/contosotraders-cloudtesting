@@ -12,7 +12,7 @@ class StatsReporter implements Reporter {
   constructor() {
     // Read endpoint from environment variable or fall back to default
     this.endpoint =
-      process.env.STATS_ENDPOINT || "http://localhost:8000/api/run/results";
+      process.env.STAT_ENDPOINT || "http://localhost:8000/api/run/results";
 
     // Determine JSON results file location using Playwright's environment variables
     const outputFile = process.env.PLAYWRIGHT_JSON_OUTPUT_FILE;
