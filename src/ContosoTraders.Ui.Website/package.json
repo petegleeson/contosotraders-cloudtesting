@@ -45,7 +45,8 @@
     ]
   },
   "devDependencies": {
-    "@playwright/test": "^1.43.1",
+    "@azure/microsoft-playwright-testing": "^1.0.0-beta.6",
+    "@playwright/test": "^1.49.1",
     "@types/node": "^18.11.18",
     "babel-plugin-macros": "^3.1.0",
     "csv-parse": "^5.5.0",

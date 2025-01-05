@@ -1,18 +1,18 @@
-import { defineConfig, devices } from '@playwright/test';
+import { defineConfig, devices } from "@playwright/test";
 
 /**
  * Read environment variables from file.
  * https://github.com/motdotla/dotenv
  */
-require('dotenv').config({ path: '.env.playwright.local' })
+require("dotenv").config({ path: ".env.playwright.local" });
 
 export default defineConfig({
-  testDir: './tests',
+  testDir: "./tests",
   /* Maximum time one test can run for. */
   timeout: 80 * 1000,
   expect: {
     // Account for pixel difference between login being enabled/disabled
-    toHaveScreenshot: { maxDiffPixels: 100 }
+    toHaveScreenshot: { maxDiffPixels: 100 },
   },
   /* Run tests in files in parallel */
   fullyParallel: true,
@@ -24,10 +24,10 @@ export default defineConfig({
   workers: process.env.CI ? 1 : undefined,
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
   reporter: [
-    ['list'],
-    ['html'],
+    ["list"],
+    ["html"],
     ["junit", { outputFile: "playwright-report-junit/e2e-junit-results.xml" }],
-    ...(process.env.CI ? [['github'] as ['github']] : []),
+    ...(process.env.CI ? [["github"] as ["github"]] : []),
   ],
 
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
@@ -35,52 +35,54 @@ export default defineConfig({
     /* https://github.com/microsoft/playwright/issues/14440 - TODO - Investigate later */
     ignoreHTTPSErrors: true,
     /* Base URL to use in actions like `await page.goto('/')`. */
-    baseURL: process.env.REACT_APP_BASEURLFORPLAYWRIGHTTESTING || 'https://production.contosotraders.com/',
+    baseURL:
+      process.env.REACT_APP_BASEURLFORPLAYWRIGHTTESTING ||
+      "https://contoso-traders-ui2pete.azureedge.net/",
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
-    trace: 'on-first-retry',
-    screenshot: 'only-on-failure',
-    video: 'on-first-retry',
+    trace: "on-first-retry",
+    screenshot: "only-on-failure",
+    video: "on-first-retry",
   },
 
   projects: [
     // Setup project
-    { name: 'setup', testMatch: /.*\.setup\.ts/ },
+    { name: "setup", testMatch: /.*\.setup\.ts/ },
     // Test project that requires authentication
     {
-      name: 'authenticated',
+      name: "authenticated",
       testMatch: /.account\.ts/,
       use: {
-        ...devices['Desktop Chrome'],
+        ...devices["Desktop Chrome"],
         // Use prepared auth state.
-        storageState: '.auth/user.json',
+        storageState: ".auth/user.json",
       },
-      dependencies: ['setup'],
+      dependencies: ["setup"],
     },
     // Test projects that don't require authentication
     {
-      name: 'chromium',
+      name: "chromium",
       use: {
-        ...devices['Desktop Chrome']
+        ...devices["Desktop Chrome"],
       },
       testIgnore: /api/,
     },
     {
-      name: 'firefox',
+      name: "firefox",
       use: {
-        ...devices['Desktop Firefox']
+        ...devices["Desktop Firefox"],
       },
       testIgnore: /api/,
     },
     {
-      name: 'webkit',
+      name: "webkit",
       use: {
-        ...devices['Desktop Safari']
+        ...devices["Desktop Safari"],
       },
       testIgnore: /api/,
     },
     {
-      name: 'api',
-      testMatch: 'tests/api/**/*.spec.ts',
-    }
+      name: "api",
+      testMatch: "tests/api/**/*.spec.ts",
+    },
   ],
 });
