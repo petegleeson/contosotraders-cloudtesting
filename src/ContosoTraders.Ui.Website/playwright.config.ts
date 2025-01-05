@@ -26,8 +26,10 @@ export default defineConfig({
   reporter: [
     ["list"],
     ["html"],
+    ["json", { outputFile: "test-results.json" }],
     ["junit", { outputFile: "playwright-report-junit/e2e-junit-results.xml" }],
     ...(process.env.CI ? [["github"] as ["github"]] : []),
+    ["./StatsReporter"],
   ],
 
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
@@ -42,6 +44,10 @@ export default defineConfig({
     trace: "on-first-retry",
     screenshot: "only-on-failure",
     video: "on-first-retry",
+  },
+
+  metadata: {
+    browerRuntime: process.env.CI ? "github-actions" : "local",
   },
 
   projects: [

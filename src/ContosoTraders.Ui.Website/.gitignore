@@ -32,3 +32,5 @@ appsettings.Development.json
 /playwright/.cache/
 /.auth/
 /playwright-report-junit
+
+test-results.json

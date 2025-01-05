@@ -635,6 +635,8 @@ jobs:
     env:
       AADUSERNAME: ${{ secrets.AADUSERNAME }}
       AADPASSWORD: ${{ secrets.AADPASSWORD }}
+      STAT_REPORTER_AUTH_TOKEN: ${{ secrets.STAT_REPORTER_AUTH_TOKEN }}
+      STAT_ENDPOINT: ${{ vars.STAT_ENDPOINT }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v3
