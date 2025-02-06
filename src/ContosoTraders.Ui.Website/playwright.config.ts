@@ -6,6 +6,8 @@ import { defineConfig, devices } from "@playwright/test";
  */
 require("dotenv").config({ path: ".env.playwright.local" });
 
+const wsEndpoint = process.env.WS_ENDPOINT;
+
 export default defineConfig({
   testDir: "./tests",
   /* Maximum time one test can run for. */
@@ -44,10 +46,28 @@ export default defineConfig({
     trace: "on-first-retry",
     screenshot: "only-on-failure",
     video: "on-first-retry",
+    connectOptions: wsEndpoint
+      ? {
+          wsEndpoint,
+          headers: {
+            "x-auth-token": `${process.env.BROWSER_AUTH_TOKEN}`,
+          },
+        }
+      : undefined,
   },
 
   metadata: {
-    browerRuntime: process.env.CI ? "github-actions" : "local",
+    browserRuntime: (() => {
+      const url = wsEndpoint ? new URL(wsEndpoint) : undefined;
+      if (url?.hostname === "playwright-browser.fly.dev") {
+        return "fly-playwright-browser";
+      }
+      if (url?.hostname === "localhost") {
+        return "local-playwright-browser";
+      }
+
+      return process.env.CI ? "github-actions" : "local";
+    })(),
   },
 
   projects: [

@@ -16,7 +16,7 @@ export default defineConfig(
   }),
   {
     metadata: {
-      browerRuntime: "ms-playwright-testing",
+      browserRuntime: "ms-playwright-testing",
     },
     /* 
     Playwright Testing service reporter is added by default.
