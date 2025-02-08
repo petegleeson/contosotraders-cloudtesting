@@ -71,23 +71,27 @@ jobs:
         uses: azure/CLI@v1
         if: ${{ env.AADUSERNAME != '' && env.AADPASSWORD != '' }}
         with:
+          azcliversion: 2.67.0
           inlineScript: az ad app create --display-name ${{ env.AZURE_AD_APP_NAME}}${{ vars.SUFFIX }} --sign-in-audience AzureADandPersonalMicrosoftAccount
       - name: get azure ad app's object id
         uses: azure/CLI@v1
         if: ${{ env.AADUSERNAME != '' && env.AADPASSWORD != '' }}
         id: get-azureAdAppObjId
         with:
+          azcliversion: 2.67.0
           inlineScript: echo "azureAdAppObjId"="$(az ad app list --display-name ${{ env.AZURE_AD_APP_NAME }}${{ vars.SUFFIX }} --query [].id -o tsv)" >> $GITHUB_OUTPUT
       - name: get azure ad app's client id
         uses: azure/CLI@v1
         if: ${{ env.AADUSERNAME != '' && env.AADPASSWORD != '' }}
         id: get-azureAdAppClientId
         with:
+          azcliversion: 2.67.0
           inlineScript: echo "azureAdAppClientId"="$(az ad app list --display-name ${{ env.AZURE_AD_APP_NAME }}${{ vars.SUFFIX }} --query [].appId -o tsv)" >> $GITHUB_OUTPUT
       - name: register app as a spa
         uses: azure/CLI@v1
         if: ${{ env.AADUSERNAME != '' && env.AADPASSWORD != '' }}
         with:
+          azcliversion: 2.67.0
           inlineScript: |
             az rest \
               --method PATCH \
@@ -98,11 +102,13 @@ jobs:
         uses: azure/CLI@v1
         if: ${{ env.AADUSERNAME != '' && env.AADPASSWORD != '' }}
         with:
+          azcliversion: 2.67.0
           inlineScript: az ad app update --id ${{ steps.get-azureAdAppObjId.outputs.azureAdAppObjId }} --enable-access-token-issuance true --enable-id-token-issuance true
       - name: enable email claim in access token
         uses: azure/CLI@v1
         if: ${{ env.AADUSERNAME != '' && env.AADPASSWORD != '' }}
         with:
+          azcliversion: 2.67.0
           inlineScript: az ad app update --id ${{ steps.get-azureAdAppObjId.outputs.azureAdAppObjId }} --optional-claims "{\"accessToken\":[{\"name\":\"email\",\"essential\":false}]}"
       # note: requesting MS Graph permissions in Azure AD app unfortunately isn't idempotent.
       # Even, if you have already requested the permissions, it'll keep adding to the list of requested permissions until you hit limit on max permissions requested.
@@ -111,6 +117,7 @@ jobs:
         uses: azure/CLI@v1
         if: ${{ env.AADUSERNAME != '' && env.AADPASSWORD != '' }}
         with:
+          azcliversion: 2.67.0
           inlineScript: |
             az ad app permission delete \
               --id ${{ steps.get-azureAdAppObjId.outputs.azureAdAppObjId }} \
@@ -119,6 +126,7 @@ jobs:
         uses: azure/CLI@v1
         if: ${{ env.AADUSERNAME != '' && env.AADPASSWORD != '' }}
         with:
+          azcliversion: 2.67.0
           inlineScript: |
             az ad app permission add \
               --id ${{ steps.get-azureAdAppObjId.outputs.azureAdAppObjId }} \
@@ -159,11 +167,13 @@ jobs:
       - name: add service principal to kv access policy
         uses: azure/CLI@v1
         with:
+          azcliversion: 2.67.0
           inlineScript: az keyvault set-policy -n ${{ env.KV_NAME }}${{ vars.SUFFIX }} -g ${{ env.RESOURCE_GROUP_NAME }}${{ vars.SUFFIX }} --secret-permissions get list set --object-id $(az ad sp show --id $(az account show --query "user.name" -o tsv) --query "id" -o tsv)
       # The AKS agent pool needs to be assigned the user-assigned managed identity created (which has kv access)
       - name: assign user-assigned managed-identity to aks agentpool
         uses: azure/CLI@v1
         with:
+          azcliversion: 2.67.0
           inlineScript: |
             az vmss identity assign \
               --identities $(az identity show -g ${{ env.RESOURCE_GROUP_NAME }}${{ vars.SUFFIX }} --name ${{ env.USER_ASSIGNED_MANAGED_IDENTITY_NAME }}${{ vars.SUFFIX }} --query "id" -o tsv) \
@@ -177,19 +187,23 @@ jobs:
       - name: seed product image (product details)
         uses: azure/CLI@v1
         with:
+          azcliversion: 2.67.0
           inlineScript: az storage blob sync --account-name '${{ env.PRODUCT_IMAGES_STORAGE_ACCOUNT_NAME }}${{ vars.SUFFIX }}' -c '${{ env.PRODUCT_DETAILS_CONTAINER_NAME }}' -s 'src/ContosoTraders.Api.Images/product-details'
       - name: seed product image (product list)
         uses: azure/CLI@v1
         with:
+          azcliversion: 2.67.0
           inlineScript: az storage blob sync --account-name '${{ env.PRODUCT_IMAGES_STORAGE_ACCOUNT_NAME }}${{ vars.SUFFIX }}' -c '${{ env.PRODUCT_LIST_CONTAINER_NAME }}' -s 'src/ContosoTraders.Api.Images/product-list'
       - name: purge product images cdn endpoint
         uses: azure/CLI@v1
         with:
+          azcliversion: 2.67.0
           inlineScript: az cdn endpoint purge --no-wait --content-paths '/*' -n '${{ env.PRODUCTS_CDN_ENDPOINT_NAME }}${{ vars.SUFFIX }}' -g '${{ env.RESOURCE_GROUP_NAME }}${{ vars.SUFFIX }}' --profile-name '${{ env.CDN_PROFILE_NAME }}${{ vars.SUFFIX }}'
       - name: extract acr password
         uses: azure/CLI@v1
         id: extract-acr-password
         with:
+          azcliversion: 2.67.0
           inlineScript: |
             acrPassword=$(az acr credential show -n ${{ env.ACR_NAME }}${{ vars.SUFFIX }} -g ${{ env.RESOURCE_GROUP_NAME }}${{ vars.SUFFIX }} --query "passwords[0].value" --output tsv)
             echo "::add-mask::$acrPassword"
@@ -215,6 +229,7 @@ jobs:
       - name: deploy to aca
         uses: azure/CLI@v1
         with:
+          azcliversion: 2.67.0
           inlineScript: |
             az config set extension.use_dynamic_install=yes_without_prompt
             az containerapp update -n ${{ env.CARTS_ACA_NAME }}${{ vars.SUFFIX }} -g ${{ env.RESOURCE_GROUP_NAME }}${{ vars.SUFFIX }} --image ${{ env.ACR_NAME }}${{ vars.SUFFIX }}.azurecr.io/${{ env.CARTS_ACR_REPOSITORY_NAME }}:${{ github.sha }}
@@ -222,6 +237,7 @@ jobs:
         if: ${{ vars.DEPLOYPRIVATEENDPOINTS == 'true' }}
         uses: azure/CLI@v1
         with:
+          azcliversion: 2.67.0
           inlineScript: |
             az config set extension.use_dynamic_install=yes_without_prompt
             az containerapp update -n ${{ env.CARTS_INTERNAL_ACA_NAME }}${{ vars.SUFFIX }} -g ${{ env.RESOURCE_GROUP_NAME }}${{ vars.SUFFIX }} --image ${{ env.ACR_NAME }}${{ vars.SUFFIX }}.azurecr.io/${{ env.CARTS_ACR_REPOSITORY_NAME }}:${{ github.sha }}
@@ -229,6 +245,7 @@ jobs:
         uses: azure/CLI@v1
         id: get-cartsApiEndpoint
         with:
+          azcliversion: 2.67.0
           inlineScript: echo "cartsApiEndpoint"="$(az keyvault secret show --vault-name ${{ env.KV_NAME }}${{ vars.SUFFIX }} --name cartsApiEndpoint --query value -o tsv)" >> $GITHUB_OUTPUT
 
       #
@@ -256,6 +273,7 @@ jobs:
         uses: azure/CLI@v1
         id: get-managedIdentityClientId
         with:
+          azcliversion: 2.67.0
           inlineScript: echo "managedIdentityClientId"="$(az identity show -g ${{ env.RESOURCE_GROUP_NAME }}${{ vars.SUFFIX }} --name ${{ env.USER_ASSIGNED_MANAGED_IDENTITY_NAME }}${{ vars.SUFFIX }} --query "clientId" -o tsv)" >> $GITHUB_OUTPUT
       - name: create kubernetes secret (kv endpoint)
         uses: Azure/k8s-create-secret@v4
@@ -325,12 +343,14 @@ jobs:
       - name: set dns label on public ip
         uses: azure/CLI@v1
         with:
+          azcliversion: 2.67.0
           inlineScript: az network public-ip update --dns-name ${{ env.AKS_DNS_LABEL }}${{ vars.SUFFIX }} -g ${{ env.AKS_NODES_RESOURCE_GROUP_NAME }}${{ vars.SUFFIX }} -n $(az network public-ip list --query "[?starts_with(name,'kubernetes-') ].name" -o tsv -g ${{ env.AKS_NODES_RESOURCE_GROUP_NAME }}${{ vars.SUFFIX }})
       # hack: extract the full fqdn / dns label of the aks app's public IP address
       - name: get aks-fqdn
         uses: azure/CLI@v1
         id: get-aks-fqdn
         with:
+          azcliversion: 2.67.0
           # note: There should be a whitespace between ')' and ']'. More details: https://stackoverflow.com/a/59154958
           inlineScript: echo "aksFqdn"="$(az network public-ip list --query "[?starts_with(name,'kubernetes-') ].dnsSettings.fqdn" -o tsv -g ${{ env.AKS_NODES_RESOURCE_GROUP_NAME }}${{ vars.SUFFIX }})" >> $GITHUB_OUTPUT
       # install cert-manager
@@ -390,11 +410,13 @@ jobs:
       - name: set productsApiEndpoint in kv
         uses: azure/CLI@v1
         with:
+          azcliversion: 2.67.0
           inlineScript: az keyvault secret set --vault-name ${{ env.KV_NAME }}${{ vars.SUFFIX }} --name productsApiEndpoint --value ${{ steps.get-aks-fqdn.outputs.aksFqdn }} --description "endpoint url (fqdn) of the products api"
       - name: get products api endpoint
         uses: azure/CLI@v1
         id: get-productsApiEndpoint
         with:
+          azcliversion: 2.67.0
           inlineScript: echo "productsApiEndpoint"="$(az keyvault secret show --vault-name ${{ env.KV_NAME }}${{ vars.SUFFIX }} --name productsApiEndpoint --query value -o tsv)" >> $GITHUB_OUTPUT
 
       #
@@ -423,20 +445,24 @@ jobs:
       - name: deploy ui to storage
         uses: azure/CLI@v1
         with:
+          azcliversion: 2.67.0
           inlineScript: az storage blob sync --account-name '${{ env.UI_STORAGE_ACCOUNT_NAME }}${{ vars.SUFFIX }}' -c '$web' -s 'src/ContosoTraders.Ui.Website/build'
       - name: purge ui cdn endpoint
         uses: azure/CLI@v1
         with:
+          azcliversion: 2.67.0
           inlineScript: az cdn endpoint purge --no-wait --content-paths '/*' -n '${{ env.UI_CDN_ENDPOINT_NAME }}${{ vars.SUFFIX }}' -g '${{ env.RESOURCE_GROUP_NAME }}${{ vars.SUFFIX }}' --profile-name '${{ env.CDN_PROFILE_NAME }}${{ vars.SUFFIX }}'
       - name: get ui cdn endpoint
         uses: azure/CLI@v1
         id: get-uiCdnEndpoint
         with:
+          azcliversion: 2.67.0
           inlineScript: echo "uiCdnEndpoint"="$(az keyvault secret show --vault-name ${{ env.KV_NAME }}${{ vars.SUFFIX }} --name uiCdnEndpoint --query value -o tsv)" >> $GITHUB_OUTPUT
       - name: register auth callback (UI CDN)
         if: ${{ env.AADUSERNAME != '' && env.AADPASSWORD != '' }}
         uses: azure/CLI@v1
         with:
+          azcliversion: 2.67.0
           inlineScript: |
             az rest \
               --method PATCH \
@@ -446,6 +472,7 @@ jobs:
       - name: display ui cdn endpoint
         uses: azure/CLI@v1
         with:
+          azcliversion: 2.67.0
           inlineScript: echo UI CDN endpoint accessible at https://$(az keyvault secret show --vault-name ${{ env.KV_NAME }}${{ vars.SUFFIX }} --name uiCdnEndpoint --query value -o tsv)
 
   load-tests-with-chaos-products-api:
@@ -465,10 +492,12 @@ jobs:
         uses: azure/CLI@v1
         id: get-chaosAksExperimentResourceId
         with:
+          azcliversion: 2.67.0
           inlineScript: echo "chaosAksExperimentResourceId"="$(az resource show --resource-group ${{ env.RESOURCE_GROUP_NAME }}${{ vars.SUFFIX }} --namespace Microsoft.Chaos --resource-type Experiments --name ${{ env.CHAOS_AKS_EXPERIMENT_NAME }}${{ vars.SUFFIX }} --query "id" -o tsv)" >> $GITHUB_OUTPUT
       - name: start chaos experiment (pod failure)
         uses: azure/CLI@v1
         with:
+          azcliversion: 2.67.0
           inlineScript: az rest --method post --uri https://management.azure.com${{ steps.get-chaosAksExperimentResourceId.outputs.chaosAksExperimentResourceId }}/start?api-version=2021-09-15-preview
       - name: sleep for 30 seconds
         run: sleep 30s
@@ -526,11 +555,13 @@ jobs:
         uses: azure/CLI@v1
         id: get-cartsInternalApiEndpoint
         with:
+          azcliversion: 2.67.0
           inlineScript: echo "cartsInternalApiEndpoint"="$(az keyvault secret show --vault-name ${{ env.KV_NAME }}${{ vars.SUFFIX }} --name cartsInternalApiEndpoint --query value -o tsv)" >> $GITHUB_OUTPUT
       - name: get vnetAcaSubnetId
         uses: azure/CLI@v1
         id: get-vnetAcaSubnetId
         with:
+          azcliversion: 2.67.0
           inlineScript: echo "vnetAcaSubnetId"="$(az keyvault secret show --vault-name ${{ env.KV_NAME }}${{ vars.SUFFIX }} -n vnetAcaSubnetId --query "value" -o tsv)" >> $GITHUB_OUTPUT
       - name: substitute tokens in load test config file
         uses: cschleiden/replace-tokens@v1.2
@@ -667,7 +698,6 @@ jobs:
           name: playwright-report
           path: src/ContosoTraders.Ui.Website/playwright-report/
           retention-days: 30
-
   playwright-service-tests-ui:
     needs: [provision]
     timeout-minutes: 20
