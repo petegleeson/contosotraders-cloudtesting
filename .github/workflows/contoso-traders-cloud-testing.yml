@@ -188,12 +188,16 @@ jobs:
         uses: azure/CLI@v1
         with:
           azcliversion: 2.67.0
-          inlineScript: az storage blob sync --account-name '${{ env.PRODUCT_IMAGES_STORAGE_ACCOUNT_NAME }}${{ vars.SUFFIX }}' -c '${{ env.PRODUCT_DETAILS_CONTAINER_NAME }}' -s 'src/ContosoTraders.Api.Images/product-details'
+          inlineScript: |
+            tdnf install -y azcopy;
+            az storage blob sync --account-name '${{ env.PRODUCT_IMAGES_STORAGE_ACCOUNT_NAME }}${{ vars.SUFFIX }}' -c '${{ env.PRODUCT_DETAILS_CONTAINER_NAME }}' -s 'src/ContosoTraders.Api.Images/product-details'
       - name: seed product image (product list)
         uses: azure/CLI@v1
         with:
           azcliversion: 2.67.0
-          inlineScript: az storage blob sync --account-name '${{ env.PRODUCT_IMAGES_STORAGE_ACCOUNT_NAME }}${{ vars.SUFFIX }}' -c '${{ env.PRODUCT_LIST_CONTAINER_NAME }}' -s 'src/ContosoTraders.Api.Images/product-list'
+          inlineScript: |
+            tdnf install -y azcopy;
+            az storage blob sync --account-name '${{ env.PRODUCT_IMAGES_STORAGE_ACCOUNT_NAME }}${{ vars.SUFFIX }}' -c '${{ env.PRODUCT_LIST_CONTAINER_NAME }}' -s 'src/ContosoTraders.Api.Images/product-list'
       - name: purge product images cdn endpoint
         uses: azure/CLI@v1
         with:
@@ -446,7 +450,9 @@ jobs:
         uses: azure/CLI@v1
         with:
           azcliversion: 2.67.0
-          inlineScript: az storage blob sync --account-name '${{ env.UI_STORAGE_ACCOUNT_NAME }}${{ vars.SUFFIX }}' -c '$web' -s 'src/ContosoTraders.Ui.Website/build'
+          inlineScript: |
+            tdnf install -y azcopy;
+            az storage blob sync --account-name '${{ env.UI_STORAGE_ACCOUNT_NAME }}${{ vars.SUFFIX }}' -c '$web' -s 'src/ContosoTraders.Ui.Website/build'
       - name: purge ui cdn endpoint
         uses: azure/CLI@v1
         with:
