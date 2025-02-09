@@ -698,7 +698,7 @@ jobs:
         id: test
         run: HOME=/root npx playwright test
       - name: upload playwright report
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: always()
         with:
           name: playwright-report
@@ -743,7 +743,7 @@ jobs:
         id: test
         run: HOME=/root npx playwright test --config playwright.config.service.js --workers=${{ vars.PLAYWRIGHT_WORKERS || 2 }}
       - name: upload playwright report
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: always()
         with:
           name: playwright-report
