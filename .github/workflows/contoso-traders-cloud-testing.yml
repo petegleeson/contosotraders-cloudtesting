@@ -741,7 +741,7 @@ jobs:
         run: npm ci
       - name: run playwright tests
         id: test
-        run: HOME=/root npx playwright test --config playwright.config.service.js --workers=${{ vars.PLAYWRIGHT_WORKERS || 2 }}
+        run: HOME=/root npx playwright test --config playwright.service.config.ts --workers=${{ vars.PLAYWRIGHT_WORKERS || 2 }}
       - name: upload playwright report
         uses: actions/upload-artifact@v4
         if: always()
