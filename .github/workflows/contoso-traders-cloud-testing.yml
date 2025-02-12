@@ -42,6 +42,10 @@ env:
   UI_STORAGE_ACCOUNT_NAME: contosotradersui2
   USER_ASSIGNED_MANAGED_IDENTITY_NAME: contoso-traders-mi-kv-access
 
+permissions: # Required when using Microsoft Entra ID to authenticate
+  id-token: write
+  contents: read
+
 jobs:
   provision:
     runs-on: ubuntu-22.04
@@ -726,6 +730,13 @@ jobs:
           node-version: 18
           cache: npm
           cache-dependency-path: src/ContosoTraders.Ui.Website/package-lock.json
+      - name: Login to Azure with AzPowershell (enableAzPSSession true)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }} # GitHub Open ID connect values copied in previous steps
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          enable-AzPSSession: true
       - name: Set env variables for testing endpoints
         run: |
           echo "REACT_APP_APIURLSHOPPINGCART"="https://${{ needs.provision.outputs.cartsApiEndpoint }}/v1" >> $GITHUB_ENV
