@@ -730,6 +730,9 @@ jobs:
           node-version: 18
           cache: npm
           cache-dependency-path: src/ContosoTraders.Ui.Website/package-lock.json
+      - name: Install Azure CLI
+        run: |
+          curl -sL https://aka.ms/InstallAzureCLIDeb | bash
       - name: azure login
         uses: azure/login@v1
         with:
